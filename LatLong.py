@@ -8,9 +8,7 @@ import re
 
 def getLatLong(val):
     url = "https://www.travelmath.com/cities/" 
-    
-    #val = val.strip()
-    
+       
     if(val == "None"):
         return "", ""
     
@@ -21,14 +19,14 @@ def getLatLong(val):
     if(len(val) != 2):
         return "", ""
     
-  #  val[0] = re.sub(r"(\w)([A-Z])", r"\1 \2", val[0])
     val[0] = val[0].strip()
     val[0] = val[0].replace(" ", "+")
     
     val[1] = val[1].strip()
     val[1] = "+" + val[1]
-    
-    url = url + val[0] + "," + val[1] #creating complete url
+
+    #creating complete url
+    url = url + val[0] + "," + val[1] 
     print(url)
     
     req = requests.get(url)
@@ -43,34 +41,32 @@ def getLatLong(val):
     if(s == "Find a city map"):
         return "", ""
     
-    #latLongDigits = [int(s) for s in re.findall(r'\d+', s)] 
     
     latVal = s[0][:-3]
     longVal = s[1][1:-2]
     print(latVal, longVal)
-#     longVal = str(latLongDigits[3]) + ":" + str(latLongDigits[4]) + ":" + str(latLongDigits[5])
 
 
     return latVal, longVal
     #print(soup.h3.get_text())
+def autopopulate(filePath):
+    wb = load_workbook(filePath, read_only=False, keep_vba=True)
+    ws = wb['Datasheet']
 
-wb = load_workbook('TestForageDataHubDatasheet_V15-AlfalfaNAL.xlsm', read_only=False, keep_vba=True)
-ws = wb.active
-
-for row in ws.iter_rows(min_row=2, min_col =2, max_col=2, max_row=10):
-    for cell in row:
-        if(cell.value is None):
-            break
-        s, k = getLatLong(cell.value)
-        #print(f'{cell.row} {cell.column} {cell.value}')
-        
-        print(f'{cell.row} {cell.column} {cell.value} {s} {k}')
-        ws.cell(row=cell.row, column=3, value=s)
-        ws.cell(row=cell.row, column=4, value=k)
-       
+    for row in ws.iter_rows(min_row=2, min_col =2, max_col=2, max_row=10):
+        for cell in row:
+            if(cell.value is None):
+                break
+            s, k = getLatLong(cell.value)
+            #print(f'{cell.row} {cell.column} {cell.value}')
             
+            print(f'{cell.row} {cell.column} {cell.value} {s} {k}')
+            ws.cell(row=cell.row, column=3, value=s)
+            ws.cell(row=cell.row, column=4, value=k)
+        
+                
 
-wb.save('TestForageDataHubDatasheet_V15-AlfalfaNAL.xlsm')
+    wb.save(filePath)
         
         
         
