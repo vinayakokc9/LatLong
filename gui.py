@@ -4,12 +4,16 @@
 
 
 from pathlib import Path
-from ctypes import windll  
+from ctypes import windll
+import tkinter  
 import pyglet, os
+from LatLong import * 
+import time
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, filedialog
+
 
 
 OUTPUT_PATH = Path(__file__).parent
@@ -67,21 +71,37 @@ canvas.create_text(
 entry_image_1 = PhotoImage(
     file=relative_to_assets("entry_1.png"))
 entry_bg_1 = canvas.create_image(
-    625.4709320068359,
-    255.68053436279297,
+    646.5,
+    264.68053436279297,
+    # 625.4709320068359,
+    # 255.68053436279297,
     image=entry_image_1
 )
 entry_1 = Text(
     bd=0,
     bg="#FFFFFF",
-    highlightthickness=0
+    font=('Inter 14'),
+    highlightthickness=0,
+    state='disabled', 
+    wrap='none'
 )
 entry_1.place(
     x=533.0,
-    y=228.0,
-    width=184.94186401367188,
-    height=53.36106872558594
+    # y=228.0,
+    y=246.0,
+    width=227.0,
+    height=35.36106872558594
+    # width=184.94186401367188,
+    # height=53.36106872558594
 )
+
+
+def findFile():
+    filename = tkinter.filedialog.askopenfilename(filetypes=(("xlsm files", "*.xlsm"), ("All files", "*.*")))
+    entry_1.configure(state='normal')
+    #regex for file name and not directory
+    entry_1.insert(tkinter.END, filename)
+    entry_1.configure(state='disabled')
 
 button_image_1 = PhotoImage(
     file=relative_to_assets("button_1.png"))
@@ -89,15 +109,32 @@ button_1 = Button(
     image=button_image_1,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_1 clicked"),
+    command=findFile,
     relief="flat"
 )
 button_1.place(
-    x=771.0,
-    y=227.0,
-    width=135.04006958007812,
-    height=55.36106872558594
+    x=792.0,
+    y=245,
+    width=113.04006958007812,
+    height=37.0
+    # x=771.0,
+    # y=227.0,
+    # width=135.04006958007812,
+    # height=55.36106872558594
 )
+
+def start():
+    text = entry_1.get("1.0", 'end-1c')
+    print(f' h{text}hello')
+
+    if(text == ""):
+        canvas.itemconfigure(errorText, text="Please upload a valid Excel file.")
+        window.after(3000,lambda: canvas.itemconfigure(errorText, text=""))
+        return
+    else:
+        # dialog saying data is being entered - enable gif
+         autopopulate(text)
+        # dialog that says data has been entered - disable gif
 
 button_image_2 = PhotoImage(
     file=relative_to_assets("button_2.png"))
@@ -105,17 +142,17 @@ button_2 = Button(
     image=button_image_2,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_2 clicked"),
+    command=start,
     relief="flat"
 )
 button_2.place(
     x=668.0,
-    y=383.0,
+    y=408.0,
     width=103.0,
     height=44.45420837402344
 )
 
-canvas.create_text(
+statusText = canvas.create_text(
     555.0,
     115.0,
     anchor="nw",
@@ -176,5 +213,15 @@ canvas.create_text(
     fill="#000000",
     font=("Inter", 18 * -1)
 )
+
+errorText = canvas.create_text(
+    620.0,
+    370.0,
+    anchor="nw",
+    text="     ",
+    fill="#000000",
+    font=("Inter", 14 * -1)
+)
+
 window.resizable(False, False)
 window.mainloop()
