@@ -6,65 +6,69 @@ from openpyxl import load_workbook
 
 import re
 
-def getLatLong(val):
+def _getLatLong(cityState):
     url = "https://www.travelmath.com/cities/" 
+    invalidLocation = "find a city map" # used for invalid input
        
-    if(val == "None"):
+    if(cityState == "None"):
         return "", ""
     
-    #removing multiple spaces
-    #val = " ".join(val.split()) 
-    
-    val = val.split(',')
-    if(len(val) != 2):
+    # example format "New York, NY"
+    cityState = cityState.split(',')
+    if(len(cityState) != 2):
         return "", ""
     
-    val[0] = val[0].strip()
-    val[0] = val[0].replace(" ", "+")
+    cityState[0] = cityState[0].strip()
+    cityState[0] = cityState[0].replace(" ", "+")
     
-    val[1] = val[1].strip()
-    val[1] = "+" + val[1]
+    cityState[1] = cityState[1].strip()
+    cityState[1] = "+" + cityState[1]
 
     #creating complete url
-    url = url + val[0] + "," + val[1] 
+    url = url + cityState[0] + "," + cityState[1] 
     print(url)
-    
+
     req = requests.get(url)
-
     soup = BeautifulSoup(req.content, "html.parser")
-
-    s = soup.h3.get_text() 
-    print(s)
-    s = s.split("/")
-    print(s)
     
-    if(s == "Find a city map"):
+    # example format 42° 1' 51" N / 93° 37' 54" W
+    latLongString = soup.h3.get_text() 
+    latLongString = latLongString.split("/")
+    
+    # handles invalid input and location
+    if(latLongString.lower() == invalidLocation.lower()):
         return "", ""
     
-    
-    latVal = s[0][:-3]
-    longVal = s[1][1:-2]
-    print(latVal, longVal)
+    # removing compass directions 
+    latVal = latLongString[0][:-3]
 
+    # removing space at the beginning and compass direction
+    longVal = latLongString[1][1:-2]
 
     return latVal, longVal
-    #print(soup.h3.get_text())
-def autopopulate(filePath):
-    wb = load_workbook(filePath, read_only=False, keep_vba=True)
-    ws = wb['Datasheet']
+    
 
-    for row in ws.iter_rows(min_row=2, min_col =2, max_col=2, max_row=10):
+
+def autopopulate(filePath):
+
+    targetCol = 2 # column 2 contains city and state values
+    startingRow = 2 # ignoring header
+    latColumn = 3
+    longColumn = 4
+    targetDatasheet = 'Datasheet'
+
+    # setting up Excel file for read and write operations
+    wb = load_workbook(filePath, read_only=False, keep_vba=True)
+    ws = wb[targetDatasheet]
+
+    for row in ws.iter_rows(min_row=startingRow, min_col=targetCol, max_col=targetCol):
         for cell in row:
             if(cell.value is None):
                 break
-            s, k = getLatLong(cell.value)
-            #print(f'{cell.row} {cell.column} {cell.value}')
-            
-            print(f'{cell.row} {cell.column} {cell.value} {s} {k}')
-            ws.cell(row=cell.row, column=3, value=s)
-            ws.cell(row=cell.row, column=4, value=k)
-        
-                
+            lat, long = _getLatLong(cell.value)
+            print(f'{cell.row} {cell.column} {cell.value} {lat} {long}')
+            ws.cell(row=cell.row, column=latColumn, value=lat)
+            ws.cell(row=cell.row, column=longColumn, value=long)
 
     wb.save(filePath)
         

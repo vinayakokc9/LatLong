@@ -97,8 +97,12 @@ entry_1.place(
 
 
 def findFile():
-    filename = tkinter.filedialog.askopenfilename(filetypes=(("xlsm files", "*.xlsm"), ("All files", "*.*")))
     entry_1.configure(state='normal')
+    if(len(entry_1.get("1.0", "end-1c")) != 0):
+        print(entry_1.get("1.0", "end-1c"))
+        entry_1.delete("1.0", tkinter.END)
+
+    filename = tkinter.filedialog.askopenfilename(filetypes=(("xlsm files", "*.xlsm"), ("All files", "*.*")))
     #regex for file name and not directory
     entry_1.insert(tkinter.END, filename)
     entry_1.configure(state='disabled')
