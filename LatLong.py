@@ -36,7 +36,7 @@ def _getLatLong(cityState):
     latLongString = latLongString.split("/")
     
     # handles invalid input and location
-    if(latLongString.lower() == invalidLocation.lower()):
+    if(latLongString[0].lower() == invalidLocation.lower()):
         return "", ""
     
     # removing compass directions 
